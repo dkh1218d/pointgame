@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.ksinfo.pointgame.mapper.UserMapper">
+	
+		<select id="memberLogin" resultType="Integer">
+			SELECT member_number
+			FROM memberinfo
+			WHERE member_name = #{member_name} and member_password = #{member_password} and logical_del_flag = '0'
+		</select>
+		
+		<insert id="newpoint">
+			INSERT INTO pointinfo(member_number)
+			SELECT #{member_number}
+			WHERE NOT EXISTS (
+				SELECT member_number FROM pointinfo WHERE member_number = #{member_number})
+		</insert>
+		
+		
+	 	<select id="pointchk" resultType="com.ksinfo.pointgame.dto.userDTO">
+			SELECT member_number, point
+			FROM pointinfo
+			WHERE member_number = #{member_number} and logical_del_flag = '0'
+		</select>
+		
+		<select id="joingame" resultType="int" parameterType="int">
+			SELECT coalesce(max(gameover), '0')
+			FROM gameinfo
+			WHERE member_number = #{member_number} and to_char(rec_update_date,'YY-MM-DD') = to_char(current_timestamp,'YY-MM-DD')
+		</select>
+</mapper> 

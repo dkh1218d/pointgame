@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.ksinfo.pointgame.mapper.MainMapper">
+	
+	<resultMap id="gamemap" type="HashMap">
+		<id column="random_number" property="random_number" />
+		<id column="input_number" property="input_number" />
+		<id column="game_count" property="game_count" />
+		<id column="game_code" property="game_code" />
+	</resultMap>
+	
+	<insert id="newGame">
+			INSERT INTO gameinfo(member_number, random_number)
+			SELECT #{member_number}, #{random_number}
+			WHERE NOT EXISTS (
+				SELECT member_number FROM gameinfo 
+				WHERE member_number = #{member_number} and to_char(rec_update_date,'YY-MM-DD') = to_char(current_timestamp,'YY-MM-DD'))
+	</insert>
+	
+	<select id="rec_game" resultMap="gamemap">
+		SELECT random_number, input_number, game_count, game_code
+		FROM gameinfo
+		WHERE member_number = #{member_number} and to_char(rec_update_date,'YY-MM-DD') = to_char(current_timestamp,'YY-MM-DD')
+	</select>
+	
+	<update id="saveGame">
+		UPDATE gameinfo
+		SET input_number = concat(input_number, #{input_number},'%'),
+		game_count = #{game_count}, rec_update_date = current_timestamp
+		WHERE member_number = #{member_number} and random_number = #{random_number}
+			and to_char(rec_update_date,'YY-MM-DD') = to_char(current_timestamp,'YY-MM-DD')
+	</update>
+
+	<update id="Complete">
+		UPDATE pointinfo
+		SET point = ${point},
+			rec_update_date = current_timestamp
+		WHERE member_number = #{member_number}
+	</update>
+	<update id="Complete2">
+		UPDATE gameinfo
+		SET gameover='1',
+			rec_update_date = current_timestamp
+		WHERE member_number = #{member_number} and game_code=#{game_code}
+	</update>
+
+</mapper> 
